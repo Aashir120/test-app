@@ -43,7 +43,7 @@
       const fullPath = root.getAttribute("data-component-path");
       return {
         filePath: fullPath,
-        fileName: fullPath.split("/").pop() || "index.tsx",
+        fileName: fullPath.split("/").pop() || "main.tsx",
       };
     }
 
@@ -53,14 +53,14 @@
       const fp = fromAncestor.getAttribute("data-file-path");
       return {
         filePath: fp,
-        fileName: fp.split("/").pop() || "index.tsx",
+        fileName: fp.split("/").pop() || "main.tsx",
       };
     }
 
     // fallback: default to main file
     return {
-      filePath: "src/components/index.tsx",
-      fileName: "index.tsx",
+      filePath: "src/main.tsx",
+      fileName: "main.tsx",
     };
   }
 
