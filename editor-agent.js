@@ -14,8 +14,12 @@
     let current = el;
     while (current && current.tagName.toLowerCase() !== "html") {
       let selector = current.tagName.toLowerCase();
-      let sib = current.previousElementSibling, nth = 1;
-      while (sib) { nth++; sib = sib.previousElementSibling; }
+      let sib = current.previousElementSibling,
+        nth = 1;
+      while (sib) {
+        nth++;
+        sib = sib.previousElementSibling;
+      }
       selector += `:nth-child(${nth})`;
       parts.unshift(selector);
       current = current.parentElement;
@@ -28,6 +32,36 @@
       el.setAttribute("data-fragment-id", "frag-" + Math.random().toString(36).slice(2, 9));
     }
     return el.getAttribute("data-fragment-id");
+  }
+
+  /* ----------------- NEW: Context Extraction ----------------- */
+  function inferFileContext(el) {
+    // Attempt to extract context from nearby metadata or script tags injected during build
+    // (for example, a meta tag or data attributes added by your app)
+    const root = document.querySelector("[data-component-path]");
+    if (root && root.getAttribute("data-component-path")) {
+      const fullPath = root.getAttribute("data-component-path");
+      return {
+        filePath: fullPath,
+        fileName: fullPath.split("/").pop() || "main.tsx",
+      };
+    }
+
+    // fallback: check closest element with data-file-path
+    const fromAncestor = el.closest("[data-file-path]");
+    if (fromAncestor) {
+      const fp = fromAncestor.getAttribute("data-file-path");
+      return {
+        filePath: fp,
+        fileName: fp.split("/").pop() || "main.tsx",
+      };
+    }
+
+    // fallback: default to main file
+    return {
+      filePath: "src/main.tsx",
+      fileName: "main.tsx",
+    };
   }
 
   let enabled = false;
@@ -53,6 +87,8 @@
         const styles = getComputedStyle(el);
         const selector = cssPathFor(el);
 
+        const fileCtx = inferFileContext(el);
+
         send("editor:nodeSelected", {
           selector,
           fragmentId: fid,
@@ -68,6 +104,10 @@
             width: styles.width,
           },
           attributes: Object.fromEntries(Array.from(el.attributes).map((a) => [a.name, a.value])),
+
+          /* ✅ NEW INFO FOR BACKEND AGENT */
+          fileName: fileCtx.fileName,
+          filePath: fileCtx.filePath,
         });
       },
       true
@@ -102,6 +142,12 @@
 
   // Style for highlighting
   const style = document.createElement("style");
-  style.textContent = `[data-highlight]{outline:2px solid #06b6d4;outline-offset:2px;transition:outline .1s ease}`;
+  style.textContent = `
+    [data-highlight]{
+      outline:2px solid #06b6d4;
+      outline-offset:2px;
+      transition:outline .1s ease;
+    }
+  `;
   document.head.appendChild(style);
 })();
