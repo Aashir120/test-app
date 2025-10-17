@@ -90,25 +90,24 @@
         const fileCtx = inferFileContext(el);
 
         send("editor:nodeSelected", {
-          selector,
-          fragmentId: fid,
-          tag: el.tagName.toLowerCase(),
-          innerText: el.innerText || "",
-          styles: {
-            color: styles.color,
-            backgroundColor: styles.backgroundColor,
-            fontSize: styles.fontSize,
-            padding: styles.padding,
-            margin: styles.margin,
-            borderRadius: styles.borderRadius,
-            width: styles.width,
-          },
-          attributes: Object.fromEntries(Array.from(el.attributes).map((a) => [a.name, a.value])),
+  selector,
+  fragmentId: fid,
+  tag: el.tagName.toLowerCase(),
+  innerText: el.innerText || "",
+  styles: {
+    color: styles.color,
+    backgroundColor: styles.backgroundColor,
+    fontSize: styles.fontSize,
+    padding: styles.padding,
+    margin: styles.margin,
+    borderRadius: styles.borderRadius,
+    width: styles.width,
+  },
+  attributes: Object.fromEntries(Array.from(el.attributes).map(a => [a.name, a.value])),
+  fileName: el.getAttribute("data-filename") || "main.tsx",
+  filePath: el.getAttribute("data-filepath") || "src/main.tsx",
+});
 
-          /* ✅ NEW INFO FOR BACKEND AGENT */
-          fileName: fileCtx.fileName,
-          filePath: fileCtx.filePath,
-        });
       },
       true
     );
